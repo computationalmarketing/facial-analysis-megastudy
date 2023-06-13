@@ -17,7 +17,7 @@ Step 3: Install `pylbfgs` library via `https://bitbucket.org/rtaylor/pylbfgs/src
 
 Step 4: Unarchive `data.zip` file in the working directory (it should become a `data` folder).
 
-Step 5: Run command `python3 ./study_results.py` from inside this directory to replicate results from the paper.
+Step 5: Run command `python3 ./study_results.py` from inside the working directory to replicate results from the paper.
 
 ## Notes
 
