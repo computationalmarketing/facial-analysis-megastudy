@@ -12,7 +12,7 @@ To run this code, you will need python3.9 installed.
 Step 0: Download this repository and within it set up a virtual environment: 
 
 ```
-pip install virtualenv
+pip3 install virtualenv
 python3.9 -m venv env
 source env/bin/activate
 ```
