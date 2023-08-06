@@ -7,13 +7,27 @@ Study participants have consented to the public release of their data (see `./qu
 
 ## Running the code
 
-To run this code, you will need python3 installed.
+To run this code, you will need python3.9 installed.
 
-Step 1: Install current versions of all required packages using command `pip3 install -r requirements.txt`
+Step 0: Download this repository and within it set up a virtual environment: 
 
-Step 2: Inside the working drectory, where `study_results.py` is located, create a `models` directory -- download to it `resnet50_ft` weights from https://github.com/cydonia999/VGGFace2-pytorch as well as `utils.py` and `models/resnet.py` files from the same repository. 
+```
+pip install virtualenv
+python3.9 -m venv env
+source env/bin/activate
+```
 
-Step 3: Install `pylbfgs` library via `https://bitbucket.org/rtaylor/pylbfgs/src/master/` by following instructions provided there. 
+Step 1: Install required package versions using command `pip3 install -r requirements.txt`
+
+Step 2: Inside the working directory, where `study_results.py` is located, create a `models` directory -- download to it `resnet50_ft` weights from https://github.com/cydonia999/VGGFace2-pytorch as well as `utils.py` and `models/resnet.py` files from the same repository. 
+
+Step 3: Install `pylbfgs` library via `https://bitbucket.org/rtaylor/pylbfgs/src/master/` by following instructions provided there. Prior to running `python setup.py install`, add the following three lines to `pylbfgs.c` file right after `param.linesearch = LBFGS_LINESEARCH_BACKTRACKING;` line (this enforces the right stopping condition):
+
+```
+param.max_linesearch = 100; 
+param.past = 10;
+param.delta = 1e-4;
+```
 
 Step 4: Unarchive `data.zip` file in the working directory (it should become a `data` folder).
 
@@ -23,7 +37,7 @@ Step 5: Run command `python3 ./study_results.py` from inside the working directo
 
 Full cross-validation as implemented in the code takes days to run when using a GPU. Folder `./results` contains computation output of the cross-validation in case you want to directly construct plots based on it. (You also need to unzip `./results/patch_importance.json.zip`).
 
-Computed weights from L1 image decomposition are also provided in `feature_shadows_final.json.zip`.
+Computed weights from L1 image decomposition are also provided in `feature_shadows_final.json.zip` (you need to unzip it).
 
 Within `./data/data.csv`, `randomID` variable contains randomly generated unique identifier of a respondent in the data. There are 3 or fewer images -- and thus observations -- per respondent.
 

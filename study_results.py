@@ -1940,14 +1940,54 @@ temp.to_csv(RESULTS+'/var_pval_order.csv',index=False)
 
 # body fitness (Q21) and iPhone Safari browser (Q6_1_TEXT_0) dependence # remove Q6_1_TEXT_1
 
+import statsmodels.api as sm
+
+# correlation matrix with clustered standard errors
+def correlate_clustered(X, clusters):
+
+    X_norm = ( X-X.mean() ) / X.std() # normalization
+    k = X_norm.shape[1]
+    corr = np.eye(k)
+    corr_pval = np.zeros((k,k))
+    for i in range(k):
+        for j in range(k):
+            if i != j:
+                mod = sm.OLS(X_norm.iloc[:,i], X_norm.iloc[:,j], missing='drop')
+                res = mod.fit(cov_type = "cluster", cov_kwds = {"groups":clusters.tolist()}) 
+                corr[i,j] = res.params[0]
+                corr_pval[i,j] = res.pvalues[0]
+
+    corr = pd.DataFrame(corr, columns=X_norm.columns, index=X_norm.columns)
+    corr_pval = pd.DataFrame(corr_pval, columns=X_norm.columns, index=X_norm.columns)
+    return corr, corr_pval
+
+
 temp = results_auc.iloc[:30]
 temp.index = temp['var_name']
 
-temp1 = data[temp.index.tolist()]
-temp1.columns = temp['var_name_full']
-rho = temp1.corr()
-rho[['Body fitness','Browser: Safari iPhone']].to_csv(RESULTS+'/body_fitness.csv')
+# temp1 = data[temp.index.tolist()]
+# temp1.columns = temp['var_name_full'].tolist()
+# rho = temp1.corr()
+# rho[['Body fitness','Browser: Safari iPhone']].to_csv(RESULTS+'/body_fitness.csv')
 
+# individual-clustered standard errors for correlation coefficient
+
+X = data[temp.index.tolist()].copy()
+X.columns = temp['var_name_full'].tolist()
+clusters = data['randomID']
+
+corr, corr_pval = correlate_clustered(X, clusters)
+
+corr[['Body fitness','Browser: Safari iPhone']].to_csv(RESULTS+'/body_fitness.csv')
+corr_pval[['Body fitness','Browser: Safari iPhone']].to_csv(RESULTS+'/body_fitness_pval.csv')
+corr_sig = corr_pval[['Body fitness','Browser: Safari iPhone']]<=0.01
+corr_sig.to_csv(RESULTS+'/body_fitness_sign.csv')
+
+# all coef values above this threshold are significant (>= 0.085)
+corr[['Body fitness','Browser: Safari iPhone']][~corr_sig].abs().max()
+
+# all coef values below this threshold are insignificant (<= 0.08)
+corr[['Body fitness','Browser: Safari iPhone']][corr_sig].abs().min()
 
 
 
@@ -2355,6 +2395,47 @@ waterfall(paths, model_names, RESULTS+'/waterfall_short')
 
 
 
+# avg. auc by model
+def auc_avg(paths, model_names, saved):
+
+    avg_auc = []
+
+    for p in paths:
+
+        temp = pd.read_csv(p)
+        temp = temp.stack().reset_index()
+        temp.columns = ['cv_fold', 'var_name', 'auc']
+
+        # calculating mean AUC mean and sd across cv folds for each variable
+        temp = temp[['var_name', 'auc']].groupby(['var_name'],sort=False).agg(['mean','std']).reset_index()
+        temp.columns = temp.columns.map('_'.join).str.strip('_')
+
+        avg_auc.append(temp['auc_mean'].mean())
+
+    avg_auc = np.array(avg_auc)
+
+
+    # plotting
+    plt.figure(figsize=(6,3), dpi=300)
+
+    plt.plot(avg_auc, model_names, '-o', color=colors[0])
+
+    plt.xlabel('Avg. AUC across 349 variables')
+    plt.gca().invert_yaxis()
+
+    plt.gca().spines["top"].set_visible(False)    
+    plt.gca().spines["bottom"].set_visible(False)    
+    plt.gca().spines["right"].set_visible(False)    
+    plt.gca().spines["left"].set_visible(False)   
+
+    plt.grid(axis='both', alpha=.4, linewidth=.1)
+
+    plt.savefig(saved+'.pdf', bbox_inches='tight', transparent=True)
+    plt.close()
+
+    pd.DataFrame([model_names,avg_auc.tolist()]).to_csv(saved+'.csv',index=False)
+
+auc_avg(paths, model_names, RESULTS+'/avg_auc')
 
 
 
@@ -2454,8 +2535,8 @@ P = np.concatenate([P,np.flip(P,2)],2)
 
 np.mean(1.*(np.abs(P)<=0.001)) # sparsity 0.85
 
-from matplotlib import colors
-divnorm = colors.TwoSlopeNorm(vmin=-1., vcenter=0., vmax=1)
+from matplotlib import colors as colorsm
+divnorm = colorsm.TwoSlopeNorm(vmin=-1., vcenter=0., vmax=1)
 
 # magnitude
 visscore = pd.DataFrame({'Var':[q_to_name_dict[q] for q in q_list] + ['Intercept'],
@@ -2745,7 +2826,7 @@ plt.close()
 np.random.seed(999)
 torch.manual_seed(999)
 loader_full_rand = create_dataloader(data,rand=True)
-finetune_and_save(loader_full_rand, loader_full_rand) # training model on all of the data
+#finetune_and_save(loader_full_rand, loader_full_rand) # training model on all of the data
 model = get_pretrained(finetuned=True)
 
 
@@ -2798,6 +2879,31 @@ rho.round(2).to_csv(RESULTS+'/face_metrics_correlations.csv')
 # from scipy.stats import t
 # tt = t.ppf(1-0.01/2,df=Y.shape[0]-2)
 # tt/np.sqrt(Y.shape[0]-2+tt**2)
+
+
+# individual-clustered standard errors for correlation coefficient
+
+X = temp[Z_df.columns.tolist()+selected].copy()
+clusters = data['randomID']
+corr, corr_pval = correlate_clustered(X, clusters) 
+
+corr = corr.loc[selected,Z_df.columns.tolist()]
+corr_pval = corr_pval.loc[selected,Z_df.columns.tolist()]
+
+corr.index = [q_to_full_name_dict[q] for q in corr.index]
+corr_pval.index = [q_to_full_name_dict[q] for q in corr_pval.index]
+
+corr.round(2).to_csv(RESULTS+'/face_metrics_correlations.csv')
+corr_pval.round(3).to_csv(RESULTS+'/face_metrics_correlations_pval.csv')
+
+corr_sig = corr_pval<=0.01
+corr_sig.to_csv(RESULTS+'/face_metrics_correlations_sign.csv')
+
+# all coef values above this threshold are significant (>= 0.072~0.8)
+corr[~corr_sig].abs().max().max()
+
+# all coef values below this threshold are insignificant (<= 0.06)
+corr[corr_sig].abs().min().min()
 
 
 
