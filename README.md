@@ -35,7 +35,7 @@ Step 5: Run command `python3 ./study_results.py` from inside the working directo
 
 ## Notes
 
-Full cross-validation as implemented in the code takes days to run when using a GPU. Folder `./results` contains computation output of the cross-validation in case you want to directly construct plots based on it. (You also need to unzip `./results/patch_importance.json.zip`).
+Full cross-validation as implemented in the code takes days to run when using a GPU (GeForce GTX 1080 Ti, CUDA 11.2, cuDNN 8.1.1). Folder `./results` contains computation output of the cross-validation in case you want to directly construct plots based on it. (You also need to unzip `./results/patch_importance.json.zip`).
 
 Computed weights from L1 image decomposition are also provided in `feature_shadows_final.json.zip` (you need to unzip it).
 
