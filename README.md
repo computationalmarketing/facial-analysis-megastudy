@@ -17,8 +17,8 @@ BibTeX:
   author={Tkachenko, Yegor and Jedidi, Kamel},
   journal={Scientific Reports},
   volume={13},
-  number = {1},
-  pages = {21073},
+  number={1},
+  pages={21073},
   year={2023}
 }
 ```
