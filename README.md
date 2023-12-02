@@ -1,7 +1,27 @@
 ## Facial Analysis
 
-This repository contains code and data for the working paper
-`Yegor Tkachenko, Kamel Jedidi. A Megastudy on the Predictability of Personal Information from Facial Images (2023).`
+This repository contains code and data for paper
+`A Megastudy on the Predictability of Personal Information from Facial Images` by Yegor Tkachenko and Kamel Jedidi published in Scientific Reports (2023). https://www.nature.com/articles/s41598-023-42054-9
+
+Citation:
+
+```
+Tkachenko, Y., Jedidi, K. A megastudy on the predictability of personal information from facial images: Disentangling demographic and non-demographic signals. Sci Rep 13, 21073 (2023). https://doi.org/10.1038/s41598-023-42054-9
+```
+
+BibTeX:
+
+```
+@article{tkachenko2023megastudy,
+  title={{A megastudy on the predictability of personal information from facial images: Disentangling demographic and non-demographic signals}},
+  author={Tkachenko, Yegor and Jedidi, Kamel},
+  journal={Scientific Reports},
+  volume={13},
+  number = {1},
+  pages = {21073},
+  year={2023}
+}
+```
 
 Study participants have consented to the public release of their data (see `./questionnaire/study_survey.pdf` for the IRB consent form respondents had to complete before they could upload images and complete the questionnaire), Study data is provided with this repository at `./data.zip`.
 
